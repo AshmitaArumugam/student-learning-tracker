@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Progress</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.back-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  font-size:22px;
+  cursor:pointer;
+  color:white;
+  background:rgba(0,0,0,0.4);
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.3s;
+  z-index:1000;
+}
+
+.back-btn:hover{
+  background:rgba(34,197,94,0.8);
+}
+
+body{
+  background:#020617;
+  color:white;
+  min-height:100vh;
+}
+
+/* ✅ CONTENT WRAPPER */
+.page-content{
+  padding:90px 40px 40px; /* top space for back button */
+}
+
+h1{
+  margin-bottom:25px;
+}
+
+/* SUMMARY */
+.summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:40px;
+}
+
+.card{
+  background:#020617;
+  border:1px solid #334155;
+  padding:20px;
+  border-radius:14px;
+  text-align:center;
+}
+
+.card h2{
+  color:#22c55e;
+  margin-bottom:8px;
+}
+
+/* SKILL PROGRESS */
+.skill-box{
+  border:1px solid #334155;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:25px;
+}
+
+.skill-header{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.bar{
+  background:#334155;
+  border-radius:20px;
+  overflow:hidden;
+  height:14px;
+}
+
+.fill{
+  background:#22c55e;
+  height:100%;
+  transition:0.5s;
+}
+
+small{
+  opacity:0.8;
+}
+</style>
+</head>
+
+<body>
+
+<!-- BACK BUTTON -->
+<div class="back-btn" onclick="goBack()">←</div>
+
+<!-- ✅ PAGE CONTENT -->
+<div class="page-content">
+
+<h1>My Progress</h1>
+
+<!-- SUMMARY -->
+<div class="summary">
+  <div class="card">
+    <h2 id="skillCount">0</h2>
+    <p>Total Skills</p>
+  </div>
+
+  <div class="card">
+    <h2 id="topicCount">0</h2>
+    <p>Total Topics</p>
+  </div>
+
+  <div class="card">
+    <h2 id="completedCount">0</h2>
+    <p>Completed Topics</p>
+  </div>
+
+  <div class="card">
+    <h2 id="activeDays">0</h2>
+    <p>Active Learning Days</p>
+  </div>
+</div>
+
+<!-- SKILL-WISE PROGRESS -->
+<div id="progressContainer"></div>
+
+</div>
+<script>
+function goBack(){
+  window.location.href = "masterpage.html";
+}
+
+const userId = localStorage.getItem("user_id");
+
+if (!userId) {
+  alert("User not logged in");
+  window.location.href = "frontpage.html";
+}
+
+async function loadProgress(){
+  try {
+    const res = await fetch("/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("skillCount").innerText = data.skillCount || 0;
+    document.getElementById("topicCount").innerText = data.topicCount || 0;
+    document.getElementById("completedCount").innerText = data.completedCount || 0;
+    document.getElementById("activeDays").innerText = data.activeDays || 0;
+
+    const container = document.getElementById("progressContainer");
+    container.innerHTML = "";
+
+    data.skills.forEach(skill => {
+      if (skill.total === 0) return;
+
+      const percent = Math.round((skill.completed / skill.total) * 100);
+
+      const div = document.createElement("div");
+      div.className = "skill-box";
+
+      div.innerHTML = `
+        <div class="skill-header">
+          <strong>${skill.skill_name}</strong>
+          <small>${skill.completed} / ${skill.total} topics completed</small>
+        </div>
+
+        <div class="bar">
+          <div class="fill" style="width:${percent}%"></div>
+        </div>
+
+        <small>${percent}% completed</small>
+      `;
+
+      container.appendChild(div);
+    });
+  } catch (err) {
+    console.error("Progress load error:", err);
+    alert("Failed to load progress");
+  }
+}
+
+loadProgress();
+</script>
+</body>
+</html>

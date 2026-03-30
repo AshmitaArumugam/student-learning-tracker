@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Daily Tasks</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.back-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  font-size:22px;
+  cursor:pointer;
+  color:white;
+  background:rgba(0,0,0,0.4);
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.3s;
+  z-index:1000;
+}
+
+.back-btn:hover{
+  background:rgba(34,197,94,0.8);
+}
+
+body{
+  background:#020617;
+  color:white;
+  min-height:100vh;
+}
+
+.page-content{
+  padding:90px 40px 40px;
+}
+
+h1{
+  margin-bottom:10px;
+}
+
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+input[type="date"]{
+  padding:8px;
+  border-radius:8px;
+  border:none;
+}
+
+.add-task{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.add-task input{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+}
+
+.add-task button{
+  padding:10px 16px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  cursor:pointer;
+  color:white;
+}
+
+.task{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  border:1px solid #334155;
+  border-radius:12px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+
+.task.done{
+  background:#14532d;
+  text-decoration:line-through;
+  opacity:0.85;
+  border:none;
+}
+
+.summary{
+  margin-top:25px;
+  border-top:1px solid #334155;
+  padding-top:15px;
+}
+
+.summary p{
+  margin:5px 0;
+}
+
+.note{
+  opacity:0.7;
+  font-size:14px;
+  margin-top:10px;
+}
+
+#endDayBtn{
+  margin-top:20px;
+  padding:12px 20px;
+  border:none;
+  border-radius:12px;
+  background:#22c55e;
+  cursor:pointer;
+  color:white;
+}
+
+#confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 14px;
+  opacity: 0.9;
+  animation: fly 1.5s ease-out forwards;
+}
+
+@keyframes fly {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--x), var(--y)) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.popup-box {
+  background: #020617;
+  border: 1px solid #22c55e;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  color: white;
+}
+
+.popup-box h2 {
+  margin-bottom: 10px;
+  color: #22c55e;
+}
+
+.popup-box button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #22c55e;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="back-btn" onclick="goBack()">←</div>
+
+<div class="page-content">
+
+<h1>Daily Tasks</h1>
+
+<div class="top-bar">
+  <div id="currentDate"></div>
+  <input type="date" id="datePicker">
+</div>
+
+<div class="add-task">
+  <input id="taskInput" placeholder="Add task for the day">
+  <button onclick="addTask()">Add</button>
+</div>
+
+<div id="taskList"></div>
+
+<div class="summary">
+  <p><strong>Planned:</strong> <span id="planned">0</span></p>
+  <p><strong>Completed:</strong> <span id="completed">0</span></p>
+  <p><strong>Completion:</strong> <span id="percentage">0%</span></p>
+
+  <p class="note">
+    You can view previous days using the date selector above.
+    Tasks from previous days are read-only.
+  </p>
+</div>
+
+<button onclick="endDay()" id="endDayBtn">End My Day</button>
+
+</div>
+
+<div id="success-popup" class="popup">
+  <div class="popup-box">
+    <h2>🎉 Great Job!</h2>
+    <p>You completed all your tasks today!</p>
+    <button onclick="closePopup()">OK</button>
+  </div>
+</div>
+
+<div id="confetti-container"></div>
+
+<script>
+const userId = localStorage.getItem("user_id");
+
+if (!userId) {
+  alert("User not logged in");
+  window.location.href = "frontpage.html";
+}
+
+const taskInput = document.getElementById("taskInput");
+const taskList = document.getElementById("taskList");
+const planned = document.getElementById("planned");
+const completedEl = document.getElementById("completed");
+const percentageEl = document.getElementById("percentage");
+const datePicker = document.getElementById("datePicker");
+const currentDate = document.getElementById("currentDate");
+const endDayBtn = document.getElementById("endDayBtn");
+
+function getTodayLocal() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function parseLocalDate(dateStr) {
+  const parts = dateStr.split("-").map(Number);
+  if (parts.length !== 3) return new Date("invalid");
+
+  const [y, m, d] = parts;
+  const dateObj = new Date(y, m - 1, d);
+
+  if (
+    dateObj.getFullYear() !== y ||
+    dateObj.getMonth() !== m - 1 ||
+    dateObj.getDate() !== d
+  ) {
+    return new Date("invalid");
+  }
+
+  return dateObj;
+}
+
+function formatDate(dateObj) {
+  if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) return "";
+
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const d = String(dateObj.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+const today = getTodayLocal();
+const todayObj = parseLocalDate(today);
+
+const maxEditableObj = new Date(todayObj);
+maxEditableObj.setDate(todayObj.getDate() + 2);
+const maxEditableDate = formatDate(maxEditableObj);
+
+datePicker.min = today;
+datePicker.max = maxEditableDate;
+
+let selectedDate = today;
+datePicker.value = today;
+currentDate.innerText = "Date: " + selectedDate;
+
+let tasks = [];
+let isDayEnded = false;
+
+function isPastDate(dateStr) {
+  const d = parseLocalDate(dateStr);
+  return !isNaN(d.getTime()) && d < todayObj;
+}
+
+function isToday(dateStr) {
+  return dateStr === today;
+}
+
+function isFutureWithinLimit(dateStr) {
+  const d = parseLocalDate(dateStr);
+  return !isNaN(d.getTime()) && d > todayObj && d <= maxEditableObj;
+}
+
+function isEditableDate(dateStr) {
+  const d = parseLocalDate(dateStr);
+  return !isNaN(d.getTime()) && d >= todayObj && d <= maxEditableObj;
+}
+
+function isFutureBeyondLimit(dateStr) {
+  const d = parseLocalDate(dateStr);
+  return !isNaN(d.getTime()) && d > maxEditableObj;
+}
+
+function loadTasks() {
+  fetch(`http://localhost:3000/tasks/${userId}/${selectedDate}`)
+    .then(res => res.json())
+    .then(data => {
+      tasks = Array.isArray(data) ? data : [];
+      isDayEnded = tasks.length > 0 && tasks.every(t => t.day_ended === true);
+      updateLockState();
+      render();
+    })
+    .catch(err => {
+      console.error("Load tasks error:", err);
+      alert("Failed to load tasks");
+    });
+}
+
+function updateLockState() {
+  const lockTasks = !isEditableDate(selectedDate) || isDayEnded;
+  const canEndDay = isToday(selectedDate) && !isDayEnded;
+
+  taskInput.disabled = lockTasks;
+  endDayBtn.disabled = !canEndDay;
+
+  if (isPastDate(selectedDate)) {
+    taskInput.placeholder = "Previous dates are read-only";
+  } else if (isFutureBeyondLimit(selectedDate)) {
+    taskInput.placeholder = "You can plan only for today and next 2 days";
+  } else if (isDayEnded) {
+    taskInput.placeholder = "Day already ended for this date";
+  } else {
+    taskInput.placeholder = "Add task for the day";
+  }
+
+  if (!canEndDay) {
+    endDayBtn.style.opacity = "0.6";
+    endDayBtn.style.cursor = "not-allowed";
+  } else {
+    endDayBtn.style.opacity = "1";
+    endDayBtn.style.cursor = "pointer";
+  }
+}
+
+function addTask() {
+  if (!isEditableDate(selectedDate) || isDayEnded) {
+    alert("You can add tasks only for today and the next 2 days");
+    return;
+  }
+
+  const text = taskInput.value.trim();
+
+  if (!text) {
+    alert("Please enter a task");
+    return;
+  }
+
+  fetch("http://localhost:3000/tasks/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      task_date: selectedDate,
+      text
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      taskInput.value = "";
+      loadTasks();
+    } else {
+      alert(data.message || "Failed to add task");
+    }
+  })
+  .catch(err => {
+    console.error("Add task error:", err);
+    alert("Server error while adding task");
+  });
+}
+
+function toggleTask(i) {
+  if (!isEditableDate(selectedDate) || isDayEnded) {
+    alert("This date is read-only. You cannot change tasks.");
+    return;
+  }
+
+  const task = tasks[i];
+
+  fetch("http://localhost:3000/tasks/toggle", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id: task.id,
+      done: !task.done
+    })
+  })
+  .then(res => res.json())
+  .then(() => loadTasks())
+  .catch(err => {
+    console.error("Toggle task error:", err);
+    alert("Failed to update task");
+  });
+}
+
+datePicker.onchange = () => {
+  const picked = datePicker.value;
+
+  if (!picked) return;
+
+  const pickedObj = parseLocalDate(picked);
+
+  if (isNaN(pickedObj.getTime())) {
+    alert("Invalid date selected");
+    datePicker.value = selectedDate;
+    return;
+  }
+
+  const normalizedPicked = formatDate(pickedObj);
+
+  if (picked !== normalizedPicked) {
+    alert("Invalid calendar date selected");
+    datePicker.value = selectedDate;
+    return;
+  }
+
+  if (isFutureBeyondLimit(picked)) {
+    alert("You can access only today and the next 2 days for planning.");
+    datePicker.value = selectedDate;
+    return;
+  }
+
+  selectedDate = picked;
+  currentDate.innerText = "Date: " + selectedDate;
+  loadTasks();
+};
+
+function render() {
+  taskList.innerHTML = "";
+  let completed = 0;
+  const lockAll = !isEditableDate(selectedDate) || isDayEnded;
+
+  tasks.forEach((t, i) => {
+    if (t.done) completed++;
+
+    const div = document.createElement("div");
+    div.className = "task" + (t.done ? " done" : "");
+    div.innerHTML = `
+      <span>${t.text}</span>
+      <span>${t.done ? "✅" : "⬜"}</span>
+    `;
+
+    if (!lockAll) {
+      div.onclick = () => toggleTask(i);
+    } else {
+      div.style.cursor = "not-allowed";
+      div.style.opacity = "0.8";
+    }
+
+    taskList.appendChild(div);
+  });
+
+  planned.innerText = tasks.length;
+  completedEl.innerText = completed;
+  percentageEl.innerText =
+    tasks.length === 0
+      ? "0%"
+      : Math.round((completed / tasks.length) * 100) + "%";
+}
+
+function endDay() {
+  if (!isToday(selectedDate)) {
+    alert("You can end the day only for today");
+    return;
+  }
+
+  if (isDayEnded) {
+    alert("This day is already ended");
+    return;
+  }
+
+  if (tasks.length === 0) {
+    alert("No tasks added for this date");
+    return;
+  }
+
+  const completed = tasks.filter(t => t.done).length;
+
+  if (completed !== tasks.length) {
+    alert("Please complete all tasks before ending the day");
+    return;
+  }
+
+  fetch("http://localhost:3000/tasks/end-day", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      task_date: selectedDate
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      isDayEnded = true;
+      updateLockState();
+      blastConfetti();
+
+      setTimeout(() => {
+        const popup = document.getElementById("success-popup");
+        if (popup) popup.style.display = "flex";
+      }, 300);
+
+      loadTasks();
+    } else {
+      alert("Failed to end the day");
+    }
+  })
+  .catch(err => {
+    console.error("End day error:", err);
+    alert("Server error while ending the day");
+  });
+}
+
+function blastConfetti() {
+  const container = document.getElementById("confetti-container");
+  if (!container) return;
+
+  const colors = ["#22c55e", "#4ade80", "#16a34a", "#facc15", "#38bdf8", "#e879f9"];
+
+  for (let i = 0; i < 100; i++) {
+    const paper = document.createElement("div");
+    paper.className = "confetti";
+    paper.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+    const fromLeft = i % 2 === 0;
+    paper.style.left = fromLeft ? "0px" : "100vw";
+    paper.style.top = Math.random() * 100 + "vh";
+
+    paper.style.setProperty("--x", (fromLeft ? 1 : -1) * (300 + Math.random() * 500) + "px");
+    paper.style.setProperty("--y", -200 - Math.random() * 500 + "px");
+
+    container.appendChild(paper);
+
+    setTimeout(() => paper.remove(), 1500);
+  }
+}
+
+function closePopup() {
+  const popup = document.getElementById("success-popup");
+  if (popup) popup.style.display = "none";
+}
+
+function goBack() {
+  window.location.href = "masterpage.html";
+}
+
+loadTasks();
+</script>
+
+</body>
+</html>

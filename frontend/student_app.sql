@@ -1,0 +1,36 @@
+CREATE DATABASE IF NOT EXISTS student_app;
+USE student_app;
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  reset_otp VARCHAR(6),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE skills (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE topics (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  skill_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  status ENUM('not-started','unclear','practicing','finished')
+         DEFAULT 'not-started',
+  FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tasks (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  task_date DATE NOT NULL,
+  text VARCHAR(255) NOT NULL,
+  done BOOLEAN DEFAULT false,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

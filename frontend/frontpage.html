@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        linear-gradient(rgba(0,0,0,0.72), rgba(0,0,0,0.72)),
+        url("bg_img1.avif");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 460px;
+    background: rgba(18, 18, 18, 0.95);
+    padding: 42px 34px;
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    transition: 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card h2 {
+    text-align: center;
+    margin-bottom: 28px;
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px 16px;
+    margin-top: 6px;
+    background: #1f2937;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: 0.25s ease;
+}
+
+.input-group input::placeholder {
+    color: #94a3b8;
+}
+
+.input-group input:focus {
+    border: 1px solid #22c55e;
+    background: #111827;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 28px;
+    background: linear-gradient(135deg, #0078d4, #1690ff);
+    color: white;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 600;
+    transition: 0.25s ease;
+    margin-top: 8px;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(0,120,212,0.35);
+}
+
+.links {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.links a {
+    color: #60a5fa;
+    cursor: pointer;
+    display: block;
+    margin-top: 10px;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.links a:hover {
+    color: #93c5fd;
+    text-decoration: underline;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+    .card {
+        max-width: 420px;
+        padding: 36px 28px;
+    }
+
+    .card h2 {
+        font-size: 28px;
+    }
+
+    .input-group input {
+        padding: 14px;
+        font-size: 15px;
+    }
+
+    button {
+        padding: 14px;
+        font-size: 16px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    body {
+        padding: 16px;
+    }
+
+    .card {
+        max-width: 100%;
+        padding: 30px 22px;
+        border-radius: 20px;
+    }
+
+    .card h2 {
+        font-size: 25px;
+        margin-bottom: 24px;
+    }
+
+    .input-group {
+        margin-bottom: 16px;
+    }
+
+    .input-group input {
+        padding: 13px 14px;
+        font-size: 15px;
+        border-radius: 12px;
+    }
+
+    button {
+        padding: 13px;
+        font-size: 15px;
+        border-radius: 24px;
+    }
+
+    .links {
+        font-size: 14px;
+        margin-top: 18px;
+    }
+
+    .links a {
+        margin-top: 8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- LOGIN -->
+    <div id="loginBox">
+        <h2>Login</h2>
+
+        <div class="input-group">
+            <input type="email" id="loginEmail" placeholder="Email">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="loginPassword" placeholder="Password">
+        </div>
+
+        <button onclick="login()">Login</button>
+
+        <div class="links">
+            <a href="reset-request.html">Forgot password?</a>
+            <a onclick="showCreate()">Create account</a>
+        </div>
+    </div>
+
+    <!-- CREATE ACCOUNT -->
+    <div id="createBox" class="hidden">
+        <h2>Create Account</h2>
+
+        <div class="input-group">
+            <input type="text" id="createName" placeholder="Name">
+        </div>
+
+        <div class="input-group">
+            <input type="email" id="createEmail" placeholder="Email">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="createPassword" placeholder="Password">
+        </div>
+
+        <button onclick="createAccount()">Register</button>
+
+        <div class="links">
+            <a onclick="showLogin()">Back to login</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function showCreate() {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("createBox").classList.remove("hidden");
+}
+
+function showLogin() {
+    document.getElementById("createBox").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
+}
+
+function login() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+
+    fetch("/login", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("Login successful");
+
+            localStorage.setItem("user_id", data.user.id);
+            localStorage.setItem("name", data.user.name);
+            localStorage.setItem("email", data.user.email);
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            window.location.href = "masterpage.html";
+        } else {
+            alert(data.message || "Login failed");
+        }
+    })
+    .catch(() => {
+        alert("Server error");
+    });
+}
+
+function createAccount() {
+    const name = document.getElementById("createName").value.trim();
+    const email = document.getElementById("createEmail").value.trim();
+    const password = document.getElementById("createPassword").value.trim();
+
+    fetch("/register", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("Registered successfully");
+            showLogin();
+        } else {
+            alert(data.message || "Registration failed");
+        }
+    })
+    .catch(() => {
+        alert("Server error");
+    });
+}
+</script>
+
+</body>
+</html>

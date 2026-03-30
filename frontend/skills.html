@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Skills</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* BACK BUTTON */
+.back-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  font-size:22px;
+  cursor:pointer;
+  color:white;
+  background:rgba(0,0,0,0.4);
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.3s;
+  z-index:1000;
+}
+.back-btn:hover{
+  background:rgba(34,197,94,0.8);
+}
+
+body{
+  background:#020617;
+  color:white;
+  min-height:100vh;
+}
+
+/* CONTENT */
+.page-content{
+  padding:90px 30px 30px;
+}
+
+h1{
+  margin-bottom:20px;
+}
+
+button{
+  padding:8px 14px;
+  border:none;
+  border-radius:8px;
+  background:#22c55e;
+  cursor:pointer;
+}
+
+input{
+  padding:8px;
+  border-radius:8px;
+  border:none;
+  margin-right:10px;
+}
+
+.skill{
+  border:1px solid #334155;
+  border-radius:14px;
+  padding:20px;
+  margin-bottom:25px;
+}
+
+.skill-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.topic{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  border-radius:10px;
+  margin:8px 0;
+  cursor:pointer;
+}
+
+/* STATUS COLORS */
+.not-started{ background:#7f1d1d; }
+.unclear{ background:#78350f; }
+.practicing{ background:#1e3a8a; }
+.finished{ background:#14532d; }
+
+small{
+  opacity:0.8;
+}
+</style>
+</head>
+
+<body>
+
+<!-- BACK -->
+<div class="back-btn" onclick="goBack()">←</div>
+
+<div class="page-content">
+
+<h1>My Skills</h1>
+
+<input id="skillInput" placeholder="Add new skill (SQL, Java...)">
+<button onclick="addSkill()">Add Skill</button>
+
+<br><br>
+
+<div id="skillsContainer"></div>
+
+</div>
+<script>
+const userId = localStorage.getItem("user_id");
+if (!userId) {
+  alert("User not logged in");
+  window.location.href = "frontpage.html";
+}
+
+const statusOrder = ["not-started","unclear","practicing","finished"];
+const statusText = {
+  "not-started":"Not Started",
+  "unclear":"Unclear",
+  "practicing":"Practicing",
+  "finished":"Finished"
+};
+
+let skills = [];
+
+async function loadSkills(){
+  const res = await fetch(`/skills/${userId}`);
+  skills = await res.json();
+  render();
+}
+
+async function addSkill(){
+  const name = skillInput.value.trim();
+  if(!name) return;
+
+  await fetch("/skills/add", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ user_id:userId, name })
+  });
+
+  skillInput.value="";
+  loadSkills();
+}
+
+async function addTopic(skillIndex){
+  const topicName = prompt("Enter topic name");
+  if(!topicName) return;
+
+  await fetch("/topics/add", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      skill_id: skills[skillIndex].id,
+      name: topicName
+    })
+  });
+
+  loadSkills();
+}
+
+async function changeStatus(skillIndex, topicIndex){
+  const topic = skills[skillIndex].topics[topicIndex];
+  const i = statusOrder.indexOf(topic.status);
+  const newStatus = statusOrder[(i+1)%statusOrder.length];
+
+  await fetch("/topics/status", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      topic_id: topic.id,
+      status: newStatus
+    })
+  });
+
+  loadSkills();
+}
+
+async function deleteTopic(e, topicId){
+  e.stopPropagation();
+
+  if(!confirm("Delete this topic?")) return;
+
+  await fetch("/topics/delete", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ topic_id: topicId })
+  });
+
+  loadSkills();
+}
+
+function render(){
+  skillsContainer.innerHTML="";
+
+  skills.forEach((skill, si)=>{
+    const div = document.createElement("div");
+    div.className="skill";
+
+    div.innerHTML=`
+      <div class="skill-header">
+        <h2>${skill.name}</h2>
+        <button onclick="addTopic(${si})">+ Add Topic</button>
+      </div>
+    `;
+
+    skill.topics.forEach((t, ti)=>{
+      const topic = document.createElement("div");
+      topic.className=`topic ${t.status}`;
+
+      topic.innerHTML=`
+        <span onclick="changeStatus(${si},${ti})">${t.name}</span>
+        <span style="display:flex;gap:10px;align-items:center">
+          <small>${statusText[t.status]}</small>
+          <button
+            onclick="deleteTopic(event, ${t.id})"
+            style="background:none;border:none;color:#f87171;cursor:pointer"
+          >🗑️</button>
+        </span>
+      `;
+
+      div.appendChild(topic);
+    });
+
+    skillsContainer.appendChild(div);
+  });
+}
+
+function goBack(){
+  history.length>1 ? history.back() : window.location.href="masterpage.html";
+}
+
+loadSkills();
+</script>
+</body>
+</html>

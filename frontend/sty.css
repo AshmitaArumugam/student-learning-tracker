@@ -1,0 +1,81 @@
+body {
+  margin: 0;
+  background: #0f0f0f;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 70px;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.icon {
+  margin: 20px 0;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Main content */
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+/* Top bar */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topbar input {
+  flex: 1;
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+}
+
+/* Banner */
+.banner {
+  margin-top: 20px;
+  height: 300px;
+  background-image: url("nba.jpg");
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Overlay */
+.overlay {
+  height: 100%;
+  padding: 30px;
+  background: linear-gradient(
+    to right,
+    rgba(0,0,0,0.7),
+    rgba(0,0,0,0.2)
+  );
+}
+
+.overlay button {
+  margin-top: 15px;
+  padding: 10px 25px;
+  border-radius: 20px;
+  border: none;
+  background: #0078d4;
+  color: white;
+  cursor: pointer;
+}

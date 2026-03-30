@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning Tracker</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:url("bg_img1.avif") no-repeat center center/cover;
+  color:white;
+}
+
+.overlay{
+  min-height:100vh;
+  background:rgba(2,6,23,0.72);
+  display:flex;
+  flex-direction:column;
+}
+
+/* NAVBAR */
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 50px;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter: blur(12px);
+}
+
+.nav-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.nav-left i{
+  font-size:30px;
+  color:#22c55e;
+}
+
+.site-name{
+  font-size:36px;
+  font-weight:700;
+}
+
+.nav-center{
+  display:flex;
+  gap:40px;
+}
+
+.nav-center a{
+  color:white;
+  text-decoration:none;
+  font-size:22px;
+  font-weight:600;
+}
+
+.nav-right{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.profile-pic{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:#22c55e;
+  overflow:hidden;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.profile-pic img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.profile-pic i{
+  font-size:22px;
+  color:white;
+}
+
+.logout-btn{
+  padding:14px 22px;
+  font-size:18px;
+  border-radius:12px;
+  background:#ef4444;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+/* MAIN */
+.main-content{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  padding:50px;
+}
+
+.description-box{
+  width:100%;
+  max-width:1300px;
+  background:rgba(2,6,23,0.75);
+  padding:60px;
+  border-radius:24px;
+}
+
+/* MAIN HEADING */
+.description-box h2{
+  font-size:40px;
+  text-align:center;
+  font-weight:700;
+  margin-bottom:18px;
+  line-height:1.3;
+}
+
+/* INTRO CONTENT */
+.intro{
+  font-size:18px;
+  text-align:center;
+  margin:25px auto 35px;
+  max-width:900px;
+  line-height:1.9;
+  color:#e2e8f0;
+}
+
+/* GRID */
+.section-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:30px;
+}
+
+/* INFO CARDS */
+.info-card{
+  padding:28px;
+  border-radius:18px;
+  background:#0f172a;
+}
+
+/* SAME SECTION HEADING SIZE */
+.info-card h3,
+.highlight-box h3{
+  font-size:28px;
+  color:#22c55e;
+  margin-bottom:16px;
+  font-weight:700;
+}
+
+/* SAME CONTENT SIZE EVERYWHERE */
+.info-card p,
+.info-card li,
+.highlight-box p{
+  font-size:18px;
+  line-height:1.9;
+  color:#f1f5f9;
+}
+
+/* LIST SPACING */
+.info-card ul{
+  padding-left:22px;
+}
+
+.info-card li{
+  margin-bottom:6px;
+}
+
+/* WHY IT MATTERS BOX */
+.highlight-box{
+  margin-top:28px;
+  padding:28px;
+  border-radius:18px;
+  background:#0f172a;
+}
+
+/* PROFILE MODAL */
+#profileModal{
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:95%;
+  max-width:600px;
+  max-height:92vh;
+  overflow-y:auto;
+  background:#020617;
+  padding:40px 30px;
+  border-radius:26px;
+  box-shadow:0 0 50px black;
+}
+
+#profileModal h3{
+  font-size:38px;
+  margin-bottom:20px;
+  text-align:center;
+}
+
+/* IMAGE */
+.profile-image{
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  margin:auto;
+  overflow:hidden;
+  margin-bottom:18px;
+}
+
+.profile-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+/* INPUTS */
+#profileModal input,
+#profileModal textarea{
+  width:100%;
+  padding:18px;
+  margin:10px 0;
+  border-radius:14px;
+  background:#1e293b;
+  color:white;
+  font-size:18px;
+  border:none;
+}
+
+#profileModal textarea{
+  min-height:120px;
+  resize:none;
+}
+
+/* BUTTONS */
+#profileModal button{
+  width:100%;
+  padding:18px;
+  margin-top:12px;
+  border-radius:16px;
+  font-size:18px;
+  border:none;
+  cursor:pointer;
+}
+
+.save-btn{
+  background:#22c55e;
+  color:black;
+  font-weight:600;
+}
+
+.close-btn{
+  background:#334155;
+  color:white;
+}
+
+/* CALENDAR */
+#calendarBox{
+  margin-top:20px;
+  padding:20px;
+  border-radius:18px;
+  background:#0f172a;
+}
+
+#calendarBox h4{
+  font-size:22px;
+  margin-bottom:16px;
+  text-align:center;
+}
+
+#calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:12px;
+}
+
+.day-cell{
+  width:38px;
+  height:38px;
+  border-radius:8px;
+  background:#1e293b;
+}
+
+.day-cell.active{
+  background:#22c55e;
+}
+
+/* FOOTER */
+footer{
+  text-align:center;
+  padding:20px 20px 30px;
+}
+
+footer p{
+  font-size:18px;
+  line-height:1.8;
+  color:#e2e8f0;
+}
+
+footer a{
+  color:#22c55e;
+  text-decoration:none;
+  font-size:18px;
+}
+
+footer a:hover{
+  text-decoration:underline;
+}
+
+/* MOBILE */
+@media(max-width:600px){
+
+  .navbar{
+    flex-direction:column;
+    gap:15px;
+    padding:18px 20px;
+  }
+
+  .nav-center{
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+  }
+
+  .nav-center a{
+    font-size:18px;
+  }
+
+  .site-name{
+    font-size:28px;
+  }
+
+  .main-content{
+    padding:30px 15px;
+  }
+
+  .description-box{
+    padding:30px 20px;
+  }
+
+  .description-box h2{
+    font-size:30px;
+  }
+
+  .intro{
+    font-size:17px;
+    line-height:1.8;
+  }
+
+  .section-grid{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+
+  .info-card h3,
+  .highlight-box h3{
+    font-size:24px;
+  }
+
+  .info-card p,
+  .info-card li,
+  .highlight-box p{
+    font-size:16px;
+    line-height:1.8;
+  }
+
+  #profileModal{
+    width:96%;
+    padding:25px 18px;
+  }
+
+  #profileModal h3{
+    font-size:28px;
+  }
+
+  .profile-image{
+    width:110px;
+    height:110px;
+  }
+
+  #profileModal input,
+  #profileModal textarea{
+    padding:14px;
+    font-size:16px;
+  }
+
+  .day-cell{
+    width:30px;
+    height:30px;
+  }
+
+  footer p,
+  footer a{
+    font-size:16px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay">
+
+  <div class="navbar">
+    <div class="nav-left">
+      <i class="fa-solid fa-graduation-cap"></i>
+      <div class="site-name">Learning Tracker</div>
+    </div>
+
+    <div class="nav-center">
+      <a href="masterpage.html">Home</a>
+      <a href="skills.html">Skills</a>
+      <a href="progress.html">Progress</a>
+      <a href="tasks.html">Tasks</a>
+      <a href="settings.html">Settings</a>
+    </div>
+
+    <div class="nav-right">
+      <div class="profile-pic" onclick="openProfile()">
+        <img id="navProfileImg" style="display:none">
+        <i id="navProfileIcon" class="fa-solid fa-user"></i>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="description-box">
+      <h2>Track Your Learning With Clarity</h2>
+
+      <p class="intro">
+        Learning Tracker helps students organize their learning journey in a clear, practical, and disciplined way.
+        Instead of studying without structure, you can plan what to learn, monitor what you complete, and build steady progress every day.
+      </p>
+
+      <div class="section-grid">
+        <div class="info-card">
+          <h3>How This Platform Works</h3>
+          <p>
+            This website allows you to add the skills you want to master, such as Java, Web Development, DBMS, or any other subject.
+            Each skill can be divided into smaller topics so your learning becomes easier to manage and more goal-oriented.
+          </p>
+          <p style="margin-top:12px;">
+            You can then create daily tasks based on those topics and complete them step by step. This helps you stay focused instead of feeling overwhelmed.
+          </p>
+        </div>
+
+        <div class="info-card">
+          <h3>How to Use It</h3>
+          <ul>
+            <li>Add your learning skills in the Skills page</li>
+            <li>Break each skill into smaller topics</li>
+            <li>Create daily tasks from your planned topics</li>
+            <li>Mark tasks as completed as you finish them</li>
+            <li>Track your daily and overall progress</li>
+            <li>End your day to lock completed work and stay disciplined</li>
+            <li>Review past tasks to understand your consistency</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <h3>Why It Matters</h3>
+        <p>
+          Many students know what they want to learn, but they struggle because they do not track their progress consistently.
+          This platform solves that by turning learning into a structured daily process.
+          It helps you improve consistency, reduce procrastination, stay motivated, and clearly see how much you have completed.
+          Over time, it becomes easier to stay committed to your goals and learn in a smarter, more organized way.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="profileModal">
+    <h3>My Profile</h3>
+
+    <div class="profile-image">
+      <img id="profileImg">
+    </div>
+
+    <input type="file" accept="image/*" onchange="uploadImage(event)">
+
+    <input id="pname" readonly>
+    <input id="pemail" readonly>
+
+    <textarea id="phobbies" placeholder="Hobbies (e.g., Coding, Music, Reading)"></textarea>
+
+    <div id="calendarBox">
+      <h4>My Learning Activity</h4>
+      <div id="calendar"></div>
+    </div>
+
+    <button class="save-btn" onclick="saveProfile()">Save</button>
+    <button class="close-btn" onclick="closeProfile()">Close</button>
+  </div>
+
+  <footer>
+    <p>Connect with me</p>
+    <p>
+      <a href="mailto:ashmitaarumugam3@gmail.com">
+        <i class="fa-solid fa-envelope"></i> ashmitaarumugam3@gmail.com
+      </a>
+      |
+      <a href="https://www.linkedin.com/in/ashmita-s-a-898865326" target="_blank">
+        <i class="fa-brands fa-linkedin"></i> LinkedIn
+      </a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+const userId = localStorage.getItem("user_id");
+
+window.onload = async () => {
+  const name = localStorage.getItem("name");
+  const email = localStorage.getItem("email");
+
+  if (!userId || !name || !email) {
+    window.location.href = "frontpage.html";
+    return;
+  }
+
+  await loadUserProfile();
+  await markTodayActivity();
+};
+
+async function loadUserProfile() {
+  try {
+    const res = await fetch(`http://localhost:3000/user/${userId}`);
+    const data = await res.json();
+
+    if (data.name) localStorage.setItem("name", data.name);
+    if (data.email) localStorage.setItem("email", data.email);
+    if (data.phone) localStorage.setItem("phone", data.phone);
+
+    if (data.profile_img) {
+      document.getElementById("profileImg").src = data.profile_img;
+      document.getElementById("navProfileImg").src = data.profile_img;
+      document.getElementById("navProfileImg").style.display = "block";
+      document.getElementById("navProfileIcon").style.display = "none";
+    }
+  } catch (err) {
+    console.log("Load profile error:", err);
+  }
+}
+
+async function markTodayActivity() {
+  try {
+    await fetch("http://localhost:3000/mark-activity", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ user_id: userId })
+    });
+  } catch (err) {
+    console.log("Activity mark error:", err);
+  }
+}
+
+function openProfile() {
+  document.getElementById("profileModal").style.display = "block";
+  document.getElementById("pname").value = localStorage.getItem("name") || "";
+  document.getElementById("pemail").value = localStorage.getItem("email") || "";
+  document.getElementById("phobbies").value = localStorage.getItem("hobbies") || "";
+
+  const currentImg = document.getElementById("navProfileImg").src;
+  if (currentImg && document.getElementById("navProfileImg").style.display !== "none") {
+    document.getElementById("profileImg").src = currentImg;
+  }
+
+  loadCalendar();
+}
+
+function closeProfile() {
+  document.getElementById("profileModal").style.display = "none";
+}
+
+async function saveProfile() {
+  const name = localStorage.getItem("name") || "";
+  const email = localStorage.getItem("email") || "";
+  const phone = localStorage.getItem("phone") || "";
+  const hobbies = document.getElementById("phobbies").value;
+  const profileImg = document.getElementById("profileImg").src || "";
+
+  localStorage.setItem("hobbies", hobbies);
+
+  try {
+    const res = await fetch("http://localhost:3000/update-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        name,
+        email,
+        phone,
+        profile_img: profileImg
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Profile saved successfully");
+    } else {
+      alert("Failed to save profile");
+    }
+  } catch (err) {
+    console.log("Save profile error:", err);
+    alert("Server error");
+  }
+}
+
+async function loadCalendar() {
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+
+  try {
+    const res = await fetch(`http://localhost:3000/activity/${userId}/${year}/${month}`);
+    const data = await res.json();
+
+    const activeDays = data.map(d => new Date(d.activity_date).getDate());
+
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const firstDay = new Date(year, month - 1, 1).getDay();
+
+    for(let i=0;i<firstDay;i++){
+      const empty = document.createElement("div");
+      empty.className = "day-cell empty";
+      calendar.appendChild(empty);
+    }
+
+    for(let d=1; d<=daysInMonth; d++){
+      const cell = document.createElement("div");
+      cell.className = "day-cell";
+
+      if(activeDays.includes(d)){
+        cell.classList.add("active");
+      }
+
+      cell.title = d;
+      calendar.appendChild(cell);
+    }
+  } catch (err) {
+    console.log("Calendar load error:", err);
+  }
+}
+
+function uploadImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      const maxWidth = 300;
+      const maxHeight = 300;
+
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+      document.getElementById("profileImg").src = compressedBase64;
+      document.getElementById("navProfileImg").src = compressedBase64;
+      document.getElementById("navProfileImg").style.display = "block";
+      document.getElementById("navProfileIcon").style.display = "none";
+    };
+
+    img.src = e.target.result;
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "frontpage.html";
+}
+</script>
+
+</body>
+</html>

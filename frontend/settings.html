@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:#020617;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  padding:24px;
+}
+
+/* BACK BUTTON */
+.back-btn{
+  position:fixed;
+  top:24px;
+  left:24px;
+  font-size:26px;
+  cursor:pointer;
+  color:white;
+  background:rgba(0,0,0,0.45);
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  transition:0.3s;
+}
+
+.back-btn:hover{
+  background:#22c55e;
+}
+
+/* BIGGER SETTINGS BOX */
+.settings-box{
+  width:100%;
+  max-width:620px;   /* increased */
+  background:#020617;
+  border:1px solid #334155;
+  border-radius:26px;
+  padding:52px 46px; /* increased */
+  box-shadow:0 0 45px black;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:34px;
+  color:#22c55e;
+  font-size:42px;   /* increased */
+  font-weight:700;
+}
+
+.input-group{
+  margin-bottom:24px;
+}
+
+.input-group label{
+  font-size:18px;   /* increased */
+  display:block;
+  margin-bottom:10px;
+  color:#cbd5e1;
+  font-weight:500;
+}
+
+.input-group input{
+  width:100%;
+  padding:18px 20px;   /* increased */
+  border-radius:16px;
+  border:none;
+  background:#1e293b;
+  color:white;
+  font-size:18px;      /* increased */
+  outline:none;
+}
+
+#email{
+  background:#0f172a;
+  color:#94a3b8;
+}
+
+button{
+  width:100%;
+  padding:18px;         /* increased */
+  margin-top:16px;
+  border:none;
+  border-radius:16px;
+  cursor:pointer;
+  font-weight:bold;
+  font-size:18px;       /* increased */
+  transition:0.3s;
+}
+
+.save{
+  background:#22c55e;
+  color:black;
+}
+
+.save:hover{
+  background:#16a34a;
+}
+
+.change{
+  background:#334155;
+  color:white;
+}
+
+.change:hover{
+  background:#475569;
+}
+
+small{
+  display:block;
+  margin-top:14px;
+  font-size:15px;
+  color:#cbd5e1;
+  text-align:center;
+  line-height:1.6;
+}
+
+/* TABLET */
+@media(max-width:768px){
+  .settings-box{
+    max-width:540px;
+    padding:42px 34px;
+  }
+
+  h1{
+    font-size:36px;
+  }
+
+  .input-group label{
+    font-size:17px;
+  }
+
+  .input-group input{
+    padding:16px 18px;
+    font-size:17px;
+  }
+
+  button{
+    padding:16px;
+    font-size:17px;
+  }
+}
+
+/* MOBILE */
+@media(max-width:480px){
+  body{
+    padding:18px;
+  }
+
+  .back-btn{
+    width:46px;
+    height:46px;
+    font-size:22px;
+    top:18px;
+    left:18px;
+  }
+
+  .settings-box{
+    max-width:100%;
+    padding:34px 24px;
+    border-radius:22px;
+  }
+
+  h1{
+    font-size:32px;
+    margin-bottom:28px;
+  }
+
+  .input-group{
+    margin-bottom:20px;
+  }
+
+  .input-group label{
+    font-size:16px;
+    margin-bottom:8px;
+  }
+
+  .input-group input{
+    padding:15px 16px;
+    font-size:16px;
+    border-radius:14px;
+  }
+
+  button{
+    padding:15px;
+    font-size:16px;
+    border-radius:14px;
+  }
+
+  small{
+    font-size:14px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="back-btn" onclick="goBack()">←</div>
+
+<div class="settings-box">
+  <h1>Settings</h1>
+
+  <div class="input-group">
+    <label>Username</label>
+    <input id="username">
+  </div>
+
+  <div class="input-group">
+    <label>Phone</label>
+    <input id="phone">
+  </div>
+
+  <div class="input-group">
+    <label>Email</label>
+    <input id="email" readonly>
+  </div>
+
+  <button class="save" onclick="saveSettings()">Save</button>
+
+  <button class="change" onclick="goToReset()">Change Password</button>
+  <small>Password reset via email verification</small>
+</div>
+<script>
+const userId = localStorage.getItem("user_id");
+
+const usernameInput = document.getElementById("username");
+const phoneInput = document.getElementById("phone");
+const emailInput = document.getElementById("email");
+
+if (!userId) {
+  alert("User not logged in");
+  window.location.href = "frontpage.html";
+}
+
+// LOAD USER DETAILS
+async function loadUser() {
+  try {
+    const res = await fetch(`/user/${userId}`);
+    const data = await res.json();
+
+    console.log("Loaded User:", data);
+
+    usernameInput.value = data.name || "";
+    phoneInput.value = data.phone || "";
+    emailInput.value = data.email || localStorage.getItem("email") || "";
+
+  } catch (error) {
+    console.log("Load User Error:", error);
+    alert("Failed to load user details");
+  }
+}
+
+// SAVE SETTINGS
+async function saveSettings() {
+  const name = usernameInput.value.trim();
+  const phone = phoneInput.value.trim();
+  const email = emailInput.value.trim();
+
+  if (!name) {
+    alert("Username is required");
+    return;
+  }
+
+  try {
+    const res = await fetch("/update-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        name: name,
+        email: email,
+        phone: phone
+      })
+    });
+
+    const data = await res.json();
+    console.log("Save Response:", data);
+
+    if (data.success) {
+      localStorage.setItem("name", name);
+      localStorage.setItem("email", email);
+      alert("Settings updated successfully");
+    } else {
+      alert(data.message || "Failed to update settings");
+    }
+  } catch (error) {
+    console.log("Save Settings Error:", error);
+    alert("Server error while saving");
+  }
+}
+
+function goToReset() {
+  window.location.href = "reset-request.html";
+}
+
+function goBack() {
+  window.location.href = "masterpage.html";
+}
+
+loadUser();
+</script>
+
+</body>
+</html>
