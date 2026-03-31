@@ -8,9 +8,19 @@ require("dotenv").config();
 const app = express();
 
 /* ================= MIDDLEWARE ================= */
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "http://127.0.0.1:5500",
+    "https://student-learning-tracker-beta.vercel.app",
+    "https://student-learning-tracker-git-main-ashmita-s-as-projects.vercel.app",
+    "https://student-learning-tracker-ncut66u2m-ashmita-s-as-projects.vercel.app"
+  ],
+  credentials: true
+}));
+
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 /* ================= DATABASE ================= */
@@ -32,6 +42,11 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
+});
+
+/* ================= TEST ROUTE ================= */
+app.get("/test", (req, res) => {
+  res.send("Backend working");
 });
 
 /* ================= AUTH ================= */
@@ -423,7 +438,7 @@ app.post("/auth/reset-password", async (req, res) => {
 
 // UPDATE PROFILE
 app.post("/update-profile", async (req, res) => {
-  const { user_id, name, email, phone, profile_image } = req.body;
+  const { user_id, name, phone, profile_image } = req.body;
 
   if (!user_id || !name) {
     return res.json({ success: false, message: "Missing data" });
@@ -431,8 +446,8 @@ app.post("/update-profile", async (req, res) => {
 
   try {
     await db.query(
-      "UPDATE users SET name=$1, email=COALESCE($2,email), phone=$3, profile_img=$4 WHERE id=$5",
-      [name, email || null, phone || null, profile_image || null, user_id]
+      "UPDATE users SET name=$1, phone=$2, profile_img=COALESCE($3, profile_img) WHERE id=$4",
+      [name, phone || null, profile_image || null, user_id]
     );
 
     res.json({ success: true });
