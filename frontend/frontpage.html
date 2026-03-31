@@ -251,7 +251,7 @@ function login() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
 
-    fetch("/login", {
+    fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
