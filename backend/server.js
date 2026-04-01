@@ -8,31 +8,20 @@ require("dotenv").config();
 const app = express();
 
 /* ================= MIDDLEWARE ================= */
-app.use((req, res, next) => {
-  const allowedOrigins = [
+const corsOptions = {
+  origin: [
     "http://localhost:3000",
     "http://127.0.0.1:5500",
     "https://student-learning-tracker-beta.vercel.app",
     "https://student-learning-tracker-git-main-ashmita-s-as-projects.vercel.app",
     "https://student-learning-tracker-ncut66u2m-ashmita-s-as-projects.vercel.app"
-  ];
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
 
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  if (req.method === "OPTIONS") {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
-
+app.use(cors(corsOptions));
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 app.use(express.static(path.join(__dirname, "../frontend")));
