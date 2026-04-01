@@ -16,7 +16,23 @@ app.use(cors({
     "https://student-learning-tracker-git-main-ashmita-s-as-projects.vercel.app",
     "https://student-learning-tracker-ncut66u2m-ashmita-s-as-projects.vercel.app"
   ],
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Handle preflight requests
+app.options('*', cors({
+  origin: [
+    "http://localhost:3000",
+    "http://127.0.0.1:5500",
+    "https://student-learning-tracker-beta.vercel.app",
+    "https://student-learning-tracker-git-main-ashmita-s-as-projects.vercel.app",
+    "https://student-learning-tracker-ncut66u2m-ashmita-s-as-projects.vercel.app"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json({ limit: "15mb" }));
