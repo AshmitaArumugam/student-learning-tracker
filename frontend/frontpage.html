@@ -283,7 +283,7 @@ function createAccount() {
     const email = document.getElementById("createEmail").value.trim();
     const password = document.getElementById("createPassword").value.trim();
 
-    fetch("/register", {
+    fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/register", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
