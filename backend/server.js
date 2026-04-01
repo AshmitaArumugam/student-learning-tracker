@@ -8,32 +8,30 @@ require("dotenv").config();
 const app = express();
 
 /* ================= MIDDLEWARE ================= */
-app.use(cors({
-  origin: [
+app.use((req, res, next) => {
+  const allowedOrigins = [
     "http://localhost:3000",
     "http://127.0.0.1:5500",
     "https://student-learning-tracker-beta.vercel.app",
     "https://student-learning-tracker-git-main-ashmita-s-as-projects.vercel.app",
     "https://student-learning-tracker-ncut66u2m-ashmita-s-as-projects.vercel.app"
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+  ];
 
-// Handle preflight requests
-app.options('*', cors({
-  origin: [
-    "http://localhost:3000",
-    "http://127.0.0.1:5500",
-    "https://student-learning-tracker-beta.vercel.app",
-    "https://student-learning-tracker-git-main-ashmita-s-as-projects.vercel.app",
-    "https://student-learning-tracker-ncut66u2m-ashmita-s-as-projects.vercel.app"
-  ],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
@@ -72,7 +70,11 @@ app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    return res.json({ success: false, message: "All fields required" });
+    return res.status(400).json({ success: false, message: "Name, email, and password are required" });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
   }
 
   try {
@@ -81,10 +83,15 @@ app.post("/register", async (req, res) => {
       [name, email, password]
     );
 
-    res.json({ success: true, user: result.rows[0] });
+    res.status(201).json({ success: true, user: result.rows[0] });
   } catch (err) {
-    console.log("Register Error:", err);
-    res.json({ success: false, message: "Email already exists" });
+    console.error("Register Error:", err);
+
+    if (err.code === '23505') { // Unique constraint violation
+      return res.status(409).json({ success: false, message: "Email already exists" });
+    }
+
+    res.status(500).json({ success: false, message: "Registration failed" });
   }
 });
 
@@ -93,7 +100,7 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.json({ success: false, message: "Email and password required" });
+    return res.status(400).json({ success: false, message: "Email and password are required" });
   }
 
   try {
@@ -103,11 +110,11 @@ app.post("/login", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.json({ success: false, message: "Invalid email" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
     if (result.rows[0].password !== password) {
-      return res.json({ success: false, message: "Wrong password" });
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
     res.json({
@@ -119,8 +126,8 @@ app.post("/login", async (req, res) => {
       }
     });
   } catch (err) {
-    console.log("Login Error:", err);
-    res.json({ success: false, message: "Login failed" });
+    console.error("Login Error:", err);
+    res.status(500).json({ success: false, message: "Server error occurred" });
   }
 });
 
