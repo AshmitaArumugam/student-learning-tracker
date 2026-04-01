@@ -330,7 +330,7 @@ function isFutureBeyondLimit(dateStr) {
 }
 
 function loadTasks() {
-  fetch(`http://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/${userId}/${selectedDate}`)
+  fetch(`https://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/${userId}/${selectedDate}`)
     .then(res => res.json())
     .then(data => {
       tasks = Array.isArray(data) ? data : [];
@@ -383,7 +383,7 @@ function addTask() {
     return;
   }
 
-  fetch("http://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/add", {
+  fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/add", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -415,7 +415,7 @@ function toggleTask(i) {
 
   const task = tasks[i];
 
-  fetch("http://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/toggle", {
+  fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/toggle", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -519,7 +519,7 @@ function endDay() {
     return;
   }
 
-  fetch("http://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/end-day", {
+  fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/tasks/end-day", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
