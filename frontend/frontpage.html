@@ -256,7 +256,7 @@ function login() {
         return;
     }
 
-    fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/login", {
+    fetch("/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -306,7 +306,7 @@ function createAccount() {
         return;
     }
 
-    fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/register", {
+    fetch("/register", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

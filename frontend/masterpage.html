@@ -540,7 +540,7 @@ window.onload = async () => {
 
 async function loadUserProfile() {
   try {
-    const res = await fetch(`https://srv-d75r4vnfte5s73fftv00.onrender.com/user/${userId}`);
+    const res = await fetch(`/user/${userId}`);
     const data = await res.json();
 
     if (data.name) localStorage.setItem("name", data.name);
@@ -560,7 +560,7 @@ async function loadUserProfile() {
 
 async function markTodayActivity() {
   try {
-    await fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/mark-activity", {
+    await fetch("/mark-activity", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -600,7 +600,7 @@ async function saveProfile() {
   localStorage.setItem("hobbies", hobbies);
 
   try {
-    const res = await fetch("https://srv-d75r4vnfte5s73fftv00.onrender.com/update-profile", {
+    const res = await fetch("/update-profile", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -636,7 +636,7 @@ async function loadCalendar() {
   const month = today.getMonth() + 1;
 
   try {
-    const res = await fetch(`https://srv-d75r4vnfte5s73fftv00.onrender.com/activity/${userId}/${year}/${month}`);
+    const res = await fetch(`/activity/${userId}/${year}/${month}`);
     const data = await res.json();
 
     const activeDays = data.map(d => new Date(d.activity_date).getDate());
