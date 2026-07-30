@@ -30,7 +30,7 @@ const corsOptions = {
       "https://student-learning-tracker-ncut66u2m-ashmita-s-as-projects.vercel.app",
       /\.vercel\.app$/,  // Allow all Vercel domains
       /\.netlify\.app$/,  // Allow Netlify domains
-      /^https?:\/\/localhost(:\d+)?$/,  // Allow localhost with any port
+      /^https?:\/\/(localhost|127\.0\.0\.1|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d+)?$/,  // Allow localhost, 127.0.0.1, and any IP with any port
     ];
 
     // Check if origin matches any allowed pattern
@@ -739,9 +739,11 @@ app.use((req, res) => {
 
 /* ================= START SERVER ================= */
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌐 Accessible at http://${HOST}:${PORT}`);
   console.log(`📡 Supabase Connection: Active`);
   console.log(`📧 Email Service: ${process.env.EMAIL_USER ? 'Connected' : 'Not configured'}`);
 });
