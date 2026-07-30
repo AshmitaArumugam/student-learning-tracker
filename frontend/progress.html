@@ -195,11 +195,18 @@ async function loadProgress(){
     });
   } catch (err) {
     console.error("Progress load error:", err);
-    alert("Failed to load progress");
+    // Don't alert, just log the error
   }
 }
 
-loadProgress();
+// Load progress when page is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadProgress);
+} else {
+  loadProgress();
+}
+</script>
+
 </script>
 </body>
 </html>

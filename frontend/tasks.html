@@ -345,7 +345,10 @@ function loadTasks() {
 }
 
 function updateLockState() {
-  const lockTasks = !isEditableDate(selectedDate) || isDayEnded;
+  // Lock if: not editable date, day ended, OR today with tasks already added
+  const isToday_ = isToday(selectedDate);
+  const hasTasksForToday = isToday_ && tasks.length > 0;
+  const lockTasks = !isEditableDate(selectedDate) || isDayEnded || hasTasksForToday;
   const canEndDay = isToday(selectedDate) && !isDayEnded;
 
   taskInput.disabled = lockTasks;
@@ -357,6 +360,8 @@ function updateLockState() {
     taskInput.placeholder = "You can plan only for today and next 2 days";
   } else if (isDayEnded) {
     taskInput.placeholder = "Day already ended for this date";
+  } else if (hasTasksForToday) {
+    taskInput.placeholder = "Tasks already added for today";
   } else {
     taskInput.placeholder = "Add task for the day";
   }
@@ -583,7 +588,12 @@ function goBack() {
   window.location.href = "masterpage.html";
 }
 
-loadTasks();
+// Load tasks when page is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadTasks);
+} else {
+  loadTasks();
+}
 </script>
 
 </body>

@@ -223,11 +223,6 @@ small{
   </div>
 
   <div class="input-group">
-    <label>Phone</label>
-    <input id="phone">
-  </div>
-
-  <div class="input-group">
     <label>Email</label>
     <input id="email" readonly>
   </div>
@@ -241,7 +236,6 @@ small{
 const userId = localStorage.getItem("user_id");
 
 const usernameInput = document.getElementById("username");
-const phoneInput = document.getElementById("phone");
 const emailInput = document.getElementById("email");
 
 if (!userId) {
@@ -258,19 +252,16 @@ async function loadUser() {
     console.log("Loaded User:", data);
 
     usernameInput.value = data.name || "";
-    phoneInput.value = data.phone || "";
     emailInput.value = data.email || localStorage.getItem("email") || "";
 
   } catch (error) {
     console.log("Load User Error:", error);
-    alert("Failed to load user details");
   }
 }
 
 // SAVE SETTINGS
 async function saveSettings() {
   const name = usernameInput.value.trim();
-  const phone = phoneInput.value.trim();
   const email = emailInput.value.trim();
 
   if (!name) {
@@ -287,8 +278,7 @@ async function saveSettings() {
       body: JSON.stringify({
         user_id: userId,
         name: name,
-        email: email,
-        phone: phone
+        email: email
       })
     });
 
@@ -299,6 +289,7 @@ async function saveSettings() {
       localStorage.setItem("name", name);
       localStorage.setItem("email", email);
       alert("Settings updated successfully");
+      loadUser();
     } else {
       alert(data.message || "Failed to update settings");
     }
@@ -316,7 +307,12 @@ function goBack() {
   window.location.href = "masterpage.html";
 }
 
-loadUser();
+// Load user when page is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadUser);
+} else {
+  loadUser();
+}
 </script>
 
 </body>

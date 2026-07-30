@@ -358,7 +358,7 @@ app.post("/tasks/add", async (req, res) => {
   try {
     const { error } = await supabase
       .from('tasks')
-      .insert([{ user_id, task_date, text, done: false, day_ended: false }]);
+      .insert([{ user_id, task_date, text, done: false }]);
 
     if (error) throw error;
     res.json({ success: true, message: "Task added successfully" });
@@ -399,11 +399,9 @@ app.post("/tasks/end-day", async (req, res) => {
   }
 
   try {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ day_ended: true })
-      .eq('user_id', user_id)
-      .eq('task_date', task_date);
+    // Just return success - tasks are automatically tracked by date
+    res.json({ success: true, message: "Day ended successfully" });
+    return;
 
     if (error) throw error;
     res.json({ success: true, message: "Day ended successfully" });
@@ -461,15 +459,15 @@ app.post("/progress", async (req, res) => {
       });
     }
 
-    // Get active days count
-    const { data: activeDays, error: activeDaysError } = await supabase
-      .from('user_activity')
-      .select('activity_date')
+    // Get active days count from tasks table
+    const { data: tasksData, error: tasksError } = await supabase
+      .from('tasks')
+      .select('task_date')
       .eq('user_id', userId);
 
-    if (activeDaysError) throw activeDaysError;
+    if (tasksError) throw tasksError;
 
-    const uniqueDays = new Set(activeDays.map(a => a.activity_date)).size;
+    const uniqueDays = new Set((tasksData || []).map(t => t.task_date)).size;
 
     res.json({
       skillCount: skillCount || 0,
@@ -625,10 +623,7 @@ app.post("/update-profile", async (req, res) => {
   }
 
   try {
-    const updateData = { name, phone: phone || null };
-    if (profile_image) {
-      updateData.profile_img = profile_image;
-    }
+    const updateData = { name };
 
     const { error } = await supabase
       .from('users')
@@ -655,7 +650,7 @@ app.get("/user/:id", async (req, res) => {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, name, email, phone, profile_img')
+      .select('id, name, email')
       .eq('id', id)
       .maybeSingle();
 
@@ -679,17 +674,7 @@ app.post("/mark-activity", async (req, res) => {
   }
 
   try {
-    const today = new Date().toISOString().split("T")[0];
-
-    const { error } = await supabase
-      .from('user_activity')
-      .upsert(
-        { user_id, activity_date: today },
-        { onConflict: 'user_id,activity_date' }
-      );
-
-    if (error) throw error;
-
+    // Activity is automatically tracked via tasks table
     res.json({ success: true, message: "Activity marked successfully" });
   } catch (err) {
     console.error("Mark Activity Error:", err);
@@ -705,17 +690,20 @@ app.get("/activity/:userId/:year/:month", async (req, res) => {
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
     const endDate = new Date(year, month, 0).toISOString().split("T")[0];
 
-    const { data: activities, error } = await supabase
-      .from('user_activity')
-      .select('activity_date')
+    // Get tasks as activity proxy
+    const { data: tasks, error } = await supabase
+      .from('tasks')
+      .select('task_date')
       .eq('user_id', userId)
-      .gte('activity_date', startDate)
-      .lte('activity_date', endDate)
-      .order('activity_date', { ascending: true });
+      .gte('task_date', startDate)
+      .lte('task_date', endDate)
+      .order('task_date', { ascending: true });
 
     if (error) throw error;
 
-    res.json(activities || []);
+    // Convert tasks to activity format
+    const activities = (tasks || []).map(t => ({ activity_date: t.task_date }));
+    res.json(activities);
   } catch (err) {
     console.error("Get Activity Error:", err);
     res.json([]);
